@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RemoteReady Audit Kit — Is Your Remote Work Setup Actually Compliant?</title>
+    <style>
+        :root {
+            --primary: #1D4ED8;
+            --primary-dark: #1E3A8A;
+            --primary-light: #DBEAFE;
+            --secondary: #2563EB;
+            --accent: #F59E0B;
+            --accent-dark: #D97706;
+            --success: #059669;
+            --danger: #DC2626;
+            --dark: #111827;
+            --text: #1F2937;
+            --muted: #6B7280;
+            --border: #E5E7EB;
+            --bg: #F9FAFB;
+            --white: #FFFFFF;
+            --shadow-sm: 0 1px 4px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 24px rgba(29,78,216,0.1);
+            --shadow-lg: 0 16px 48px rgba(29,78,216,0.16);
+            --radius: 12px;
+            --radius-lg: 20px;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: var(--text); background: var(--white); line-height: 1.6; }
+
+        /* NAV */
+        nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(255,255,255,0.96); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
+        .nav-inner { max-width: 1100px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 66px; }
+        .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .logo-icon { width: 36px; height: 36px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .logo-text { font-size: 1.05rem; font-weight: 800; color: var(--primary); }
+        .nav-links { display: flex; gap: 28px; list-style: none; }
+        .nav-links a { text-decoration: none; color: var(--muted); font-weight: 500; font-size: 0.88rem; transition: color 0.2s; }
+        .nav-links a:hover { color: var(--primary); }
+        .nav-cta { background: var(--primary); color: white; border: none; padding: 10px 22px; border-radius: 8px; font-weight: 700; font-size: 0.88rem; cursor: pointer; transition: background 0.2s; text-decoration: none; }
+        .nav-cta:hover { background: var(--primary-dark); }
+
+        /* HERO */
+        .hero { background: linear-gradient(155deg, #0F172A 0%, #1E3A8A 55%, #2563EB 100%); padding: 130px 24px 100px; text-align: center; position: relative; overflow: hidden; }
+        .hero::before { content: ''; position: absolute; top: -60px; right: -60px; width: 400px; height: 400px; background: rgba(37,99,235,0.2); border-radius: 50%; }
+        .hero::after { content: ''; position: absolute; bottom: -2px; left: 0; right: 0; height: 60px; background: var(--white); clip-path: ellipse(60% 100% at 50% 100%); }
+        .hero-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.4); color: #FDE68A; padding: 6px 18px; border-radius: 100px; font-size: 0.78rem; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 24px; }
+        .hero h1 { font-size: clamp(2rem, 5vw, 3.4rem); font-weight: 800; color: white; line-height: 1.15; max-width: 860px; margin: 0 auto 20px; }
+        .hero h1 em { font-style: normal; color: var(--accent); }
+        .hero-sub { font-size: 1.15rem; color: rgba(255,255,255,0.72); max-width: 620px; margin: 0 auto 40px; }
+        .hero-actions { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-bottom: 56px; }
+        .btn-accent { background: var(--accent); color: var(--dark); padding: 16px 36px; border-radius: var(--radius); font-weight: 700; font-size: 1.05rem; border: none; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-block; }
+        .btn-accent:hover { background: var(--accent-dark); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(245,158,11,0.35); }
+        .btn-ghost { background: transparent; color: white; padding: 16px 36px; border-radius: var(--radius); font-weight: 700; font-size: 1.05rem; border: 2px solid rgba(255,255,255,0.3); cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-block; }
+        .btn-ghost:hover { border-color: white; background: rgba(255,255,255,0.08); }
+        .hero-trust { display: flex; gap: 40px; justify-content: center; flex-wrap: wrap; }
+        .trust-item { display: flex; align-items: center; gap: 8px; color: rgba(255,255,255,0.6); font-size: 0.88rem; }
+
+        /* SECTIONS */
+        section { padding: 80px 24px; }
+        .container { max-width: 1100px; margin: 0 auto; }
+        .section-label { font-size: 0.78rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--primary); margin-bottom: 10px; }
+        .section-title { font-size: clamp(1.6rem, 3vw, 2.5rem); font-weight: 800; color: var(--dark); line-height: 1.2; margin-bottom: 14px; }
+        .section-sub { font-size: 1.05rem; color: var(--muted); max-width: 640px; }
+        .section-header { margin-bottom: 52px; }
+        .section-header.center { text-align: center; }
+        .section-header.center .section-sub { margin: 0 auto; }
+
+        /* RISK BANNER */
+        .risk-banner { background: #FEF2F2; border: 1px solid #FECACA; border-radius: var(--radius-lg); padding: 32px 40px; margin-bottom: 60px; display: flex; gap: 24px; align-items: flex-start; }
+        .risk-icon { font-size: 2.4rem; flex-shrink: 0; }
+        .risk-banner h3 { font-size: 1.15rem; font-weight: 800; color: var(--danger); margin-bottom: 8px; }
+        .risk-banner p { font-size: 0.93rem; color: #7F1D1D; line-height: 1.7; }
+        .risk-stats { display: flex; gap: 40px; margin-top: 20px; flex-wrap: wrap; }
+        .risk-stat { text-align: left; }
+        .risk-stat strong { display: block; font-size: 1.8rem; font-weight: 800; color: var(--danger); }
+        .risk-stat span { font-size: 0.82rem; color: #991B1B; }
+
+        /* WHAT'S INCLUDED */
+        .included-section { background: var(--bg); }
+        .included-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 22px; }
+        .included-card { background: white; border-radius: var(--radius-lg); border: 1px solid var(--border); padding: 30px 24px; box-shadow: var(--shadow-sm); }
+        .included-card .card-icon { font-size: 2.2rem; margin-bottom: 14px; }
+        .included-card h3 { font-size: 1rem; font-weight: 800; color: var(--dark); margin-bottom: 8px; }
+        .included-card p { font-size: 0.88rem; color: var(--muted); line-height: 1.65; }
+        .included-card .card-tag { display: inline-block; background: var(--primary-light); color: var(--primary); font-size: 0.72rem; font-weight: 700; padding: 3px 10px; border-radius: 100px; margin-top: 12px; }
+
+        /* WHO IT'S FOR */
+        .audience-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; }
+        .audience-card { border-radius: var(--radius-lg); padding: 32px 28px; }
+        .audience-card.card-1 { background: linear-gradient(135deg, #EFF6FF, #DBEAFE); border: 1px solid #BFDBFE; }
+        .audience-card.card-2 { background: linear-gradient(135deg, #F0FDF4, #DCFCE7); border: 1px solid #BBF7D0; }
+        .audience-card.card-3 { background: linear-gradient(135deg, #FFFBEB, #FEF3C7); border: 1px solid #FDE68A; }
+        .audience-card .a-icon { font-size: 2.4rem; margin-bottom: 14px; }
+        .audience-card h3 { font-size: 1.05rem; font-weight: 800; color: var(--dark); margin-bottom: 10px; }
+        .audience-card ul { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+        .audience-card ul li { font-size: 0.88rem; color: var(--text); display: flex; align-items: flex-start; gap: 8px; }
+        .audience-card ul li::before { content: '&#10003;'; color: var(--success); font-weight: 700; flex-shrink: 0; }
+
+        /* PRICING */
+        .pricing-section { background: var(--bg); }
+        .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; max-width: 800px; margin: 0 auto; }
+        .price-card { background: white; border-radius: var(--radius-lg); border: 2px solid var(--border); padding: 38px 30px; text-align: center; transition: transform 0.2s; }
+        .price-card.featured { border-color: var(--primary); box-shadow: var(--shadow-lg); transform: scale(1.04); }
+        .price-card:hover { transform: translateY(-4px); }
+        .price-card.featured:hover { transform: scale(1.04) translateY(-4px); }
+        .best-badge { background: var(--primary); color: white; font-size: 0.7rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 4px 14px; border-radius: 100px; margin-bottom: 14px; display: inline-block; }
+        .price-tier { font-size: 1.15rem; font-weight: 800; color: var(--dark); margin-bottom: 10px; }
+        .price-amount { font-size: 3.2rem; font-weight: 800; color: var(--primary); line-height: 1; }
+        .price-amount sup { font-size: 1.2rem; vertical-align: super; }
+        .price-term { font-size: 0.85rem; color: var(--muted); margin: 6px 0 16px; }
+        .price-desc { font-size: 0.9rem; color: var(--muted); margin-bottom: 26px; min-height: 44px; }
+        .price-features { list-style: none; text-align: left; margin-bottom: 28px; }
+        .price-features li { display: flex; align-items: flex-start; gap: 10px; font-size: 0.88rem; color: var(--text); padding: 8px 0; border-bottom: 1px solid var(--border); }
+        .price-features li:last-child { border-bottom: none; }
+        .price-features li::before { content: '&#10003;'; color: var(--success); font-weight: 700; flex-shrink: 0; }
+        .price-btn { width: 100%; padding: 14px; border-radius: var(--radius); font-weight: 700; font-size: 0.97rem; cursor: pointer; border: none; transition: all 0.2s; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-yellow { background: var(--accent); color: var(--dark); }
+        .btn-yellow:hover { background: var(--accent-dark); }
+
+        /* FAQ */
+        .faq-list { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+        .faq-item { background: white; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+        .faq-q { padding: 22px 24px; font-weight: 700; font-size: 0.97rem; color: var(--dark); cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+        .faq-q::after { content: '+'; font-size: 1.4rem; color: var(--primary); flex-shrink: 0; transition: transform 0.2s; }
+        .faq-item.open .faq-q::after { transform: rotate(45deg); }
+        .faq-a { display: none; padding: 0 24px 22px; font-size: 0.91rem; color: var(--muted); line-height: 1.75; border-top: 1px solid var(--border); padding-top: 18px; }
+        .faq-item.open .faq-a { display: block; }
+
+        /* CTA SECTION */
+        .cta-section { background: linear-gradient(155deg, #0F172A 0%, #1E3A8A 60%, #2563EB 100%); text-align: center; }
+        .cta-section h2 { font-size: clamp(1.8rem, 3.5vw, 2.8rem); font-weight: 800; color: white; margin-bottom: 16px; }
+        .cta-section p { font-size: 1.05rem; color: rgba(255,255,255,0.7); max-width: 560px; margin: 0 auto 36px; }
+        .cta-actions { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+        /* FOOTER */
+        footer { background: var(--dark); color: rgba(255,255,255,0.5); padding: 36px 24px; text-align: center; font-size: 0.85rem; }
+        footer strong { color: rgba(255,255,255,0.8); }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .price-card.featured { transform: scale(1); }
+            .risk-banner { flex-direction: column; }
+            .risk-stats { gap: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- NAVIGATION -->
+<nav>
+    <div class="nav-inner">
+        <a href="#" class="nav-logo">
+            <div class="logo-icon">&#9989;</div>
+            <span class="logo-text">RemoteReady Audit Kit</span>
+        </a>
+        <ul class="nav-links">
+            <li><a href="#whats-included">What's Included</a></li>
+            <li><a href="#who-its-for">Who It's For</a></li>
+            <li><a href="#pricing">Pricing</a></li>
+            <li><a href="#faq">FAQ</a></li>
+        </ul>
+        <a href="#pricing" class="nav-cta">Get the Kit</a>
+    </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="container">
+        <div class="hero-badge">&#9888; 2026 Compliance Edition</div>
+        <h1>Is Your Remote Work Setup <em>Actually Compliant?</em></h1>
+        <p class="hero-sub">Most remote-first companies are unknowingly breaking labor laws in 3 or more states. The RemoteReady Audit Kit gives you everything you need to find out — and fix it — before you get fined.</p>
+        <div class="hero-actions">
+            <a href="#pricing" class="btn-accent">Get the Audit Kit — Starting at $19</a>
+            <a href="#whats-included" class="btn-ghost">See What's Inside</a>
+        </div>
+        <div class="hero-trust">
+            <div class="trust-item">&#128274; One-time payment — yours forever</div>
+            <div class="trust-item">&#128196; PDF + 3 fill-in-the-blank documents</div>
+            <div class="trust-item">&#9989; Used by HR teams in 40+ states</div>
+        </div>
+    </div>
+</section>
+
+<!-- RISK SECTION -->
+<section>
+    <div class="container">
+        <div class="risk-banner">
+            <div class="risk-icon">&#128680;</div>
+            <div>
+                <h3>Remote Work Compliance Is a Hidden Legal Landmine</h3>
+                <p>When your employee works remotely from a different state, your company may owe taxes in that state, must follow that state's labor laws, and could face penalties for missing required notices and expense reimbursements. Multi-state remote teams are the #1 compliance blindspot for small and mid-size businesses in 2026.</p>
+                <div class="risk-stats">
+                    <div class="risk-stat"><strong>73%</strong><span>of SMBs with remote workers have at least one compliance gap</span></div>
+                    <div class="risk-stat"><strong>$50K+</strong><span>average penalty per violation in high-regulation states</span></div>
+                    <div class="risk-stat"><strong>34 states</strong><span>have unique remote worker notice or expense reimbursement rules</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- WHAT'S INCLUDED -->
+<section class="included-section" id="whats-included">
+    <div class="container">
+        <div class="section-header center">
+            <div class="section-label">Complete Kit</div>
+            <h2 class="section-title">Four Documents. Total Compliance Coverage.</h2>
+            <p class="section-sub">Everything is ready to use — download, fill in your company details, and you're covered.</p>
+        </div>
+        <div class="included-grid">
+            <div class="included-card">
+                <div class="card-icon">&#128209;</div>
+                <h3>Distributed Team Audit Workbook (PDF)</h3>
+                <p>The core audit workbook walks your HR team through every compliance dimension: stress and wellness benchmarks, energy and workload mapping, delegation frameworks, and weekly accountability tracking — aligned to current labor wellness standards.</p>
+                <span class="card-tag">Print-ready PDF</span>
+            </div>
+            <div class="included-card">
+                <div class="card-icon">&#128203;</div>
+                <h3>Remote Work Policy Template</h3>
+                <p>A complete, legally-informed policy template for small businesses covering equipment requirements, security obligations, availability expectations, expense reimbursement, and performance measurement. Fill in your company details and it's ready to sign.</p>
+                <span class="card-tag">Markdown + editable</span>
+            </div>
+            <div class="included-card">
+                <div class="card-icon">&#127482;&#127480;</div>
+                <h3>State-by-State Compliance Checklist</h3>
+                <p>Remote work compliance requirements for the top 10 states with the highest remote worker populations: California, Texas, New York, Florida, Washington, Illinois, Colorado, Massachusetts, Georgia, and Arizona. Covers tax nexus, labor law differences, required notices, and expense rules.</p>
+                <span class="card-tag">10 states covered</span>
+            </div>
+            <div class="included-card">
+                <div class="card-icon">&#9989;</div>
+                <h3>Remote Worker Onboarding Checklist</h3>
+                <p>A 50-point onboarding checklist organized by timeline: Before Day 1, Day 1, Week 1, and Month 1. Covers equipment setup, account provisioning, introductions, training milestones, expectations setting, and 30-day integration check-ins.</p>
+                <span class="card-tag">50 action items</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- WHO IT'S FOR -->
+<section id="who-its-for">
+    <div class="container">
+        <div class="section-header center">
+            <div class="section-label">Made For</div>
+            <h2 class="section-title">Built for the People Actually Managing Remote Teams</h2>
+            <p class="section-sub">This kit isn't for enterprise legal teams with $500/hr outside counsel. It's for people trying to get compliant without spending a fortune.</p>
+        </div>
+        <div class="audience-grid">
+            <div class="audience-card card-1">
+                <div class="a-icon">&#128101;</div>
+                <h3>HR Managers &amp; People Ops Teams</h3>
+                <ul>
+                    <li>Managing employees across multiple states</li>
+                    <li>Need a documented remote work policy on file</li>
+                    <li>Onboarding remote hires and want a consistent process</li>
+                    <li>Preparing for HR audits or due diligence reviews</li>
+                    <li>Tracking compliance without a dedicated legal team</li>
+                </ul>
+            </div>
+            <div class="audience-card card-2">
+                <div class="a-icon">&#127968;</div>
+                <h3>Remote Workers &amp; Managers</h3>
+                <ul>
+                    <li>Working from a state different from your employer</li>
+                    <li>Want to know your rights around expense reimbursement</li>
+                    <li>Managing a distributed team for the first time</li>
+                    <li>Navigating home office security requirements</li>
+                    <li>Setting clear availability and communication expectations</li>
+                </ul>
+            </div>
+            <div class="audience-card card-3">
+                <div class="a-icon">&#127970;</div>
+                <h3>Small Business Owners</h3>
+                <ul>
+                    <li>Hired your first remote employee outside your home state</li>
+                    <li>Want a professional policy without paying for an HR consultant</li>
+                    <li>Growing fast and need compliance guardrails in place</li>
+                    <li>Just found out you may have multi-state tax exposure</li>
+                    <li>Building remote-first culture with a solid policy foundation</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing-section" id="pricing">
+    <div class="container">
+        <div class="section-header center">
+            <div class="section-label">Simple Pricing</div>
+            <h2 class="section-title">One-Time Payment. No Subscription. No Lawyer Required.</h2>
+            <p class="section-sub">A single employment attorney letter costs $400–$800. This kit costs $19 or $47 and covers your whole team.</p>
+        </div>
+        <div class="pricing-grid">
+            <div class="price-card">
+                <div class="price-tier">Basic Kit</div>
+                <div class="price-amount"><sup>$</sup>19</div>
+                <div class="price-term">One-time — yours forever</div>
+                <div class="price-desc">The essentials to audit your setup and put a policy in place today</div>
+                <ul class="price-features">
+                    <li>Distributed Team Audit Workbook (PDF)</li>
+                    <li>Remote Work Policy Template (editable)</li>
+                    <li>Remote Worker Onboarding Checklist (50 points)</li>
+                    <li>Instant download — no account required</li>
+                </ul>
+                <button class="price-btn btn-primary">Get Basic Kit — $19</button>
+            </div>
+            <div class="price-card featured">
+                <div class="best-badge">Most Complete</div>
+                <div class="price-tier">Pro Kit</div>
+                <div class="price-amount"><sup>$</sup>47</div>
+                <div class="price-term">One-time — yours forever</div>
+                <div class="price-desc">Everything in Basic plus state-by-state compliance coverage and email support</div>
+                <ul class="price-features">
+                    <li>Everything in Basic Kit</li>
+                    <li>State-by-State Remote Compliance Checklist (10 states)</li>
+                    <li>Priority email support — compliance questions answered within 48 hours</li>
+                    <li>Free updates for 12 months as laws change</li>
+                    <li>Bonus: Remote Manager Communication Scripts (5 templates)</li>
+                    <li>Bonus: Independent Contractor vs. Employee classification guide</li>
+                </ul>
+                <button class="price-btn btn-yellow">Get Pro Kit — $47</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+    <div class="container">
+        <div class="section-header center">
+            <div class="section-label">Common Questions</div>
+            <h2 class="section-title">Frequently Asked Questions</h2>
+        </div>
+        <div class="faq-list">
+            <div class="faq-item">
+                <div class="faq-q">Is this actual legal advice, or just a template?</div>
+                <div class="faq-a">This kit is an educational resource and professionally-researched template — not legal advice and not a substitute for an attorney. The policy template and checklists are based on commonly recognized best practices and publicly available state labor law guidance as of 2026. For company-specific situations involving significant legal risk, you should consult a licensed employment attorney in the relevant states. That said, this kit will give you a strong working foundation and help you have a much more productive conversation with any attorney you do engage.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-q">My company has employees in 3 states. Does this cover all of them?</div>
+                <div class="faq-a">The Pro Kit's State-by-State Compliance Checklist covers the 10 states with the highest remote worker populations: California, Texas, New York, Florida, Washington, Illinois, Colorado, Massachusetts, Georgia, and Arizona. These 10 states account for roughly 68% of the US remote workforce. If your employees are in other states, the general remote work policy template and onboarding checklist apply everywhere — you'd just need to research the specific notice requirements for any state not covered in the checklist.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-q">Can I use the policy template as-is, or do I need to customize it?</div>
+                <div class="faq-a">You'll need to fill in the bracketed fields with your company-specific details — things like your company name, your specific equipment provision policy, your reimbursement dollar thresholds, and your IT security requirements. The document is clearly marked with [COMPANY NAME], [INSERT POLICY], and similar placeholders wherever customization is required. The policy language itself is ready to use and covers all major categories. Most users complete the customization in under an hour.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-q">Is this useful if my whole team is already remote and has been for years?</div>
+                <div class="faq-a">Absolutely — in fact, established remote teams are often at higher risk than newly remote ones because their informal arrangements have never been documented. If you don't have a written remote work policy on file, you don't have a policy. This kit helps you formalize what you're already doing, identify gaps you may have gotten used to living with, and onboard future hires with a consistent process. The audit workbook alone surfaces issues that most teams have been ignoring for years.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-q">What format are the documents in? Can I edit them?</div>
+                <div class="faq-a">The Audit Workbook is a print-ready PDF. The three documents — the policy template, state checklist, and onboarding checklist — are delivered in Markdown format, which opens in any text editor, Notion, Obsidian, Google Docs (via import), or Word. Markdown is intentionally chosen so you own an editable, plain-text version of every document with no proprietary format lock-in. If you want a Word (.docx) version of any document, just email us and we'll convert it for you at no charge.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-q">What if laws change after I buy this? Will the documents be outdated?</div>
+                <div class="faq-a">Remote work law is evolving rapidly — new state notice requirements, expense reimbursement rules, and tax nexus thresholds are being enacted every year. Basic Kit purchasers get the documents as of the date of purchase. Pro Kit purchasers get free updates for 12 months — whenever we update the state compliance checklist or policy template to reflect new legislation, you'll receive the updated versions automatically. This is particularly important for California, Colorado, and Illinois, which update their remote work rules most frequently.</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="cta-section">
+    <div class="container">
+        <h2>Don't Wait for a Compliance Notice to Find Out You're Exposed</h2>
+        <p>The cost of fixing a multi-state compliance violation after the fact is 10–50x higher than preventing it. Get the kit today and know exactly where you stand.</p>
+        <div class="cta-actions">
+            <a href="#pricing" class="btn-accent">Get the Audit Kit — Starting at $19</a>
+            <a href="#faq" class="btn-ghost">Read the FAQ First</a>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+    <p>&copy; 2026 <strong>RemoteReady</strong>. All rights reserved.</p>
+    <p style="margin-top: 8px;">This kit is an educational resource. It is not legal advice. Consult a licensed employment attorney for company-specific compliance questions.</p>
+</footer>
+
+<script>
+    document.querySelectorAll('.faq-q').forEach(function(q) {
+        q.addEventListener('click', function() {
+            var item = this.parentElement;
+            item.classList.toggle('open');
+        });
+    });
+</script>
+
+</body>
+</html>
